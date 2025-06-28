@@ -2,8 +2,8 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vinharia Elegante - Sistema de Gestão</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ARMAZENA - Sistema de Gestão</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
@@ -42,6 +42,7 @@
             padding: 0;
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            -webkit-tap-highlight-color: transparent; /* Remover destaque ao tocar */
         }
 
         body {
@@ -49,6 +50,7 @@
             color: var(--cor-texto);
             overflow-x: hidden;
             transition: var(--transicao);
+            touch-action: manipulation; /* Melhorar resposta ao toque */
         }
 
         .container {
@@ -56,6 +58,7 @@
             flex-direction: column;
             min-height: 100vh;
             position: relative;
+            padding-bottom: 60px; /* Espaço para navegação inferior */
         }
 
         header {
@@ -89,6 +92,11 @@
             padding: 5px;
             overflow-x: auto;
             -webkit-overflow-scrolling: touch;
+            scrollbar-width: none; /* Firefox */
+        }
+
+        .navegacao::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Edge */
         }
 
         .nav-btn {
@@ -105,6 +113,8 @@
             gap: 8px;
             font-size: 0.85rem;
             min-width: max-content;
+            flex: 1;
+            justify-content: center;
         }
 
         .nav-btn.ativo {
@@ -117,14 +127,17 @@
             flex: 1;
             transition: transform 0.4s ease;
             overflow: hidden;
+            width: 400%; /* 4 seções de 100% cada */
         }
 
         .secao {
-            min-width: 100%;
+            width: 25%; /* Cada seção ocupa 25% do container */
             padding: 1rem;
             display: flex;
             flex-direction: column;
             gap: 1.2rem;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .secao-titulo {
@@ -167,12 +180,13 @@
 
         input, select, button, textarea {
             width: 100%;
-            padding: 10px;
+            padding: 12px; /* Aumentado para melhor toque */
             border-radius: 8px;
             border: 1px solid var(--cor-borda);
-            font-size: 0.95rem;
+            font-size: 1rem; /* Tamanho de fonte aumentado */
             background-color: var(--cor-card);
             color: var(--cor-texto);
+            -webkit-appearance: none; /* Remover estilos padrão iOS */
         }
 
         button {
@@ -186,12 +200,17 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            padding: 10px;
+            padding: 12px;
+            font-size: 1rem;
         }
 
         button:hover {
             opacity: 0.9;
             transform: translateY(-2px);
+        }
+
+        button:active {
+            transform: scale(0.98); /* Feedback visual ao tocar */
         }
 
         button.btn-secundario {
@@ -277,7 +296,7 @@
             font-size: 0.8rem;
         }
 
-        .dose-tag {
+        .unidade-tag {
             background-color: rgba(75, 54, 33, 0.2);
             color: var(--cor-ternaria);
             padding: 3px 8px;
@@ -299,8 +318,8 @@
 
         .controles button {
             width: auto;
-            padding: 8px 12px;
-            font-size: 0.85rem;
+            padding: 10px 14px; /* Aumentado para melhor toque */
+            font-size: 0.9rem;
         }
 
         .tema-btn {
@@ -310,14 +329,15 @@
             background-color: var(--cor-card);
             color: var(--cor-texto);
             border-radius: 50%;
-            width: 36px;
-            height: 36px;
+            width: 40px; /* Aumentado */
+            height: 40px; /* Aumentado */
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             box-shadow: var(--sombra);
             z-index: 100;
+            font-size: 1.2rem;
         }
 
         .valor-oculto {
@@ -337,13 +357,13 @@
 
         .tipo-btn {
             flex: 1;
-            padding: 8px;
+            padding: 10px; /* Aumentado */
             text-align: center;
             border: 2px solid var(--cor-borda);
             border-radius: 8px;
             cursor: pointer;
             transition: var(--transicao);
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
 
         .tipo-btn.ativo {
@@ -430,10 +450,10 @@
         }
         
         .search-item {
-            padding: 8px;
+            padding: 10px; /* Aumentado */
             cursor: pointer;
             border-bottom: 1px solid var(--cor-borda);
-            font-size: 0.9rem;
+            font-size: 0.95rem; /* Aumentado */
         }
         
         .search-item:hover {
@@ -444,12 +464,12 @@
             display: block;
             width: 100%;
             text-align: center;
-            padding: 6px;
+            padding: 8px; /* Aumentado */
             background: rgba(139, 0, 0, 0.1);
             color: var(--cor-primaria);
             border-radius: 0 0 8px 8px;
             cursor: pointer;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
         
         /* Modal de carregamento */
@@ -481,6 +501,46 @@
             color: #333;
         }
         
+        /* Navegação móvel inferior */
+        .mobile-nav {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(135deg, var(--cor-primaria), var(--cor-ternaria));
+            z-index: 100;
+            padding: 8px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.2);
+        }
+        
+        .mobile-nav-buttons {
+            display: flex;
+            justify-content: space-around;
+        }
+        
+        .mobile-nav-btn {
+            background: none;
+            border: none;
+            color: white;
+            padding: 10px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transicao);
+        }
+        
+        .mobile-nav-btn.ativo {
+            background-color: white;
+            color: var(--cor-primaria);
+            transform: translateY(-8px);
+        }
+        
         /* Responsividade */
         @media (max-width: 768px) {
             .secao {
@@ -488,12 +548,12 @@
             }
             
             .card {
-                padding: 0.8rem;
+                padding: 1rem;
             }
             
             .nav-btn {
-                padding: 8px 10px;
-                font-size: 0.8rem;
+                padding: 10px;
+                font-size: 0.9rem;
             }
             
             .controles {
@@ -517,7 +577,17 @@
             }
             
             th, td {
-                padding: 8px 6px;
+                padding: 10px 8px;
+            }
+            
+            /* Ocultar navegação superior em mobile */
+            .navegacao {
+                display: none;
+            }
+            
+            /* Mostrar navegação móvel */
+            .mobile-nav {
+                display: block;
             }
         }
         
@@ -541,8 +611,28 @@
             .tema-btn {
                 top: 10px;
                 right: 10px;
-                width: 32px;
-                height: 32px;
+                width: 36px;
+                height: 36px;
+            }
+            
+            /* Ajustes para inputs em dispositivos iOS */
+            input[type="date"], 
+            input[type="month"], 
+            input[type="number"], 
+            input[type="text"], 
+            select {
+                font-size: 16px; /* Evitar zoom automático */
+            }
+            
+            button {
+                font-size: 0.9rem;
+                padding: 12px 8px;
+            }
+            
+            .mobile-nav-btn {
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
             }
         }
     </style>
@@ -562,7 +652,7 @@
         <header>
             <div class="logo-container">
                 <i class="fas fa-wine-bottle"></i>
-                <h1>Vinharia Elegante</h1>
+                <h1>ARMAZENA - drinks</h1>
             </div>
             <div class="navegacao">
                 <button class="nav-btn ativo" data-secao="vendas">
@@ -592,14 +682,14 @@
                     </div>
                     
                     <div class="search-container">
-                        <input type="text" id="pesquisa-produto" placeholder="Pesquisar vinho...">
+                        <input type="text" id="pesquisa-produto" placeholder="Pesquisar bebida...">
                         <i class="fas fa-search search-icon" id="pesquisa-produto-icon"></i>
                         <div class="search-results" id="resultados-pesquisa"></div>
                     </div>
                     
                     <div class="form-group">
                         <select id="produto-venda" required>
-                            <option value="">Selecione um vinho</option>
+                            <option value="">Selecione uma bebida</option>
                         </select>
                     </div>
                     
@@ -614,7 +704,7 @@
                     </div>
                     
                     <div id="info-produto" class="info-card">
-                        <p><i class="fas fa-info-circle"></i> Selecione um vinho para ver detalhes</p>
+                        <p><i class="fas fa-info-circle"></i> Selecione uma bebida para ver detalhes</p>
                     </div>
                     
                     <div id="mensagem-venda" class="mensagem"></div>
@@ -628,8 +718,8 @@
                 
                 <div class="card">
                     <h3><i class="fas fa-lightbulb"></i> Instruções</h3>
-                    <p>1. Selecione o vinho na lista</p>
-                    <p>2. Informe a quantidade em garrafas ou doses</p>
+                    <p>1. Selecione a bebida na lista</p>
+                    <p>2. Informe a quantidade em garrafas ou unidades</p>
                     <p>3. O preço total será calculado automaticamente</p>
                     <p>4. Clique em "Registrar Venda" para confirmar</p>
                 </div>
@@ -710,25 +800,25 @@
                 <h2 class="secao-titulo"><i class="fas fa-wine-bottle"></i> Gerenciamento de Estoque</h2>
                 
                 <div class="card">
-                    <h3><i class="fas fa-plus"></i> Adicionar/Editar Vinho</h3>
+                    <h3><i class="fas fa-plus"></i> Adicionar/Editar Produto</h3>
                     
                     <div class="tipo-toggle">
-                        <div class="tipo-btn ativo" data-tipo="dose">
-                            <i class="fas fa-glass"></i> Venda por Dose
-                        </div>
-                        <div class="tipo-btn" data-tipo="garrafa">
+                        <div class="tipo-btn ativo" data-tipo="garrafa">
                             <i class="fas fa-wine-bottle"></i> Garrafa
+                        </div>
+                        <div class="tipo-btn" data-tipo="unidade">
+                            <i class="fas fa-box"></i> Unidade
                         </div>
                     </div>
                     
                     <div class="form-group">
-                        <label for="nome-produto">Nome do Vinho:</label>
+                        <label for="nome-produto">Nome do Produto:</label>
                         <input type="text" id="nome-produto" required>
                     </div>
                     
-                    <div class="form-group" id="container-doses" style="display: none;">
-                        <label for="doses-total">Quantidade de Doses:</label>
-                        <input type="number" id="doses-total" min="1" step="1" required>
+                    <div class="form-group" id="container-unidades" style="display: none;">
+                        <label for="unidades-total">Quantidade de Unidades:</label>
+                        <input type="number" id="unidades-total" min="1" step="1" required>
                     </div>
                     
                     <div class="form-group" id="container-garrafas">
@@ -755,7 +845,7 @@
                     
                     <div class="botoes-acao">
                         <button id="btn-salvar-produto">
-                            <i class="fas fa-save"></i> Salvar Vinho
+                            <i class="fas fa-save"></i> Salvar Produto
                         </button>
                         <button id="btn-limpar-form">
                             <i class="fas fa-broom"></i> Limpar
@@ -765,17 +855,17 @@
                 
                 <div class="card">
                     <div class="search-container">
-                        <input type="text" id="pesquisa-estoque" placeholder="Pesquisar vinho no estoque...">
+                        <input type="text" id="pesquisa-estoque" placeholder="Pesquisar produto no estoque...">
                         <i class="fas fa-search search-icon"></i>
                     </div>
                     
-                    <h3><i class="fas fa-list"></i> Lista de Vinhos em Estoque</h3>
+                    <h3><i class="fas fa-list"></i> Lista de Produtos em Estoque</h3>
                     
                     <div style="overflow-x: auto;">
                         <table id="tabela-estoque">
                             <thead>
                                 <tr>
-                                    <th>Vinho</th>
+                                    <th>Produto</th>
                                     <th>Tipo</th>
                                     <th>Estoque</th>
                                     <th>Preço Venda</th>
@@ -847,7 +937,7 @@
                         <p>1. Faça backups regulares e armazene em locais diferentes</p>
                         <p>2. Use um serviço de nuvem (Google Drive, Dropbox) para armazenar backups</p>
                         <p>3. Não compartilhe seus arquivos de backup com terceiros</p>
-                        <p>4. Mantenha seu navegador atualizado para evitar problemas de segurança</p>
+                        <p>4. Mantenhe seu navegador atualizado para evitar problemas de segurança</p>
                     </div>
                 </div>
                 
@@ -863,6 +953,24 @@
                     <div id="restore-message" class="mensagem" style="margin-top: 15px;"></div>
                 </div>
             </section>
+        </div>
+        
+        <!-- Navegação móvel inferior -->
+        <div class="mobile-nav">
+            <div class="mobile-nav-buttons">
+                <button class="mobile-nav-btn ativo" data-secao="vendas">
+                    <i class="fas fa-cash-register"></i>
+                </button>
+                <button class="mobile-nav-btn" data-secao="financas">
+                    <i class="fas fa-chart-line"></i>
+                </button>
+                <button class="mobile-nav-btn" data-secao="estoque">
+                    <i class="fas fa-warehouse"></i>
+                </button>
+                <button class="mobile-nav-btn" data-secao="backup">
+                    <i class="fas fa-database"></i>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -884,6 +992,7 @@
         // Elementos DOM
         const secoes = document.getElementById('secoes');
         const navBtns = document.querySelectorAll('.nav-btn');
+        const mobileNavBtns = document.querySelectorAll('.mobile-nav-btn');
         const temaBtn = document.getElementById('tema-btn');
         const modalCarregamento = document.getElementById('modal-carregamento');
         
@@ -926,6 +1035,51 @@
             
             // Iniciar sistema de backup automático
             iniciarBackupAutomatico();
+            
+            // Adicionar produtos iniciais se necessário
+            if(produtos.length === 0) {
+                produtos = [
+                    {
+                        id: '1',
+                        nome: 'Vinho Tinto Reserva',
+                        estoque: 50,
+                        precoCompra: 25,
+                        precoVenda: 80,
+                        tipo: 'garrafa',
+                        estoqueMinimo: 10
+                    },
+                    {
+                        id: '2',
+                        nome: 'Cerveja Artesanal',
+                        estoque: 200,
+                        precoCompra: 5,
+                        precoVenda: 15,
+                        tipo: 'unidade',
+                        estoqueMinimo: 50
+                    },
+                    {
+                        id: '3',
+                        nome: 'Whisky 12 anos',
+                        estoque: 30,
+                        precoCompra: 120,
+                        precoVenda: 300,
+                        tipo: 'garrafa',
+                        estoqueMinimo: 5
+                    },
+                    {
+                        id: '4',
+                        nome: 'Vodka Premium',
+                        estoque: 40,
+                        precoCompra: 40,
+                        precoVenda: 100,
+                        tipo: 'garrafa',
+                        estoqueMinimo: 8
+                    }
+                ];
+                salvarDados();
+                carregarProdutosVenda();
+                atualizarTabelaEstoque();
+            }
         });
         
         // Funções para pesquisas
@@ -980,7 +1134,7 @@
             resultadosDiv.innerHTML = '';
             
             if (resultados.length === 0) {
-                resultadosDiv.innerHTML = '<div class="search-item">Nenhum vinho encontrado</div>';
+                resultadosDiv.innerHTML = '<div class="search-item">Nenhum produto encontrado</div>';
                 resultadosDiv.classList.add('visible');
                 return;
             }
@@ -1059,7 +1213,7 @@
                 // Configurações do documento
                 doc.setFontSize(22);
                 doc.setTextColor(139, 0, 0); // Vinho
-                doc.text('Relatório Financeiro - Vinharia', 105, 20, null, null, 'center');
+                doc.text('Relatório Financeiro - Adega', 105, 20, null, null, 'center');
                 
                 doc.setFontSize(12);
                 doc.setTextColor(100);
@@ -1186,12 +1340,12 @@
         // Funções de inicialização
         function carregarProdutosVenda() {
             const select = document.getElementById('produto-venda');
-            select.innerHTML = '<option value="">Selecione um vinho</option>';
+            select.innerHTML = '<option value="">Selecione uma bebida</option>';
             
             produtos.forEach(produto => {
                 const option = document.createElement('option');
                 option.value = produto.id;
-                option.textContent = `${produto.nome} (${produto.tipo === 'dose' ? produto.estoque + ' doses' : produto.estoque + ' garrafas'})`;
+                option.textContent = `${produto.nome} (${produto.tipo === 'unidade' ? produto.estoque + ' unidades' : produto.estoque + ' garrafas'})`;
                 option.dataset.tipo = produto.tipo;
                 select.appendChild(option);
             });
@@ -1202,7 +1356,7 @@
             tbody.innerHTML = '';
             
             if (produtos.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center;">Nenhum vinho cadastrado</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center;">Nenhum produto cadastrado</td></tr>`;
                 return;
             }
             
@@ -1212,12 +1366,12 @@
                     tr.classList.add('estoque-baixo');
                 }
                 
-                const tipoTag = produto.tipo === 'dose' ? 
-                    `<span class="dose-tag">Dose</span>` : 
+                const tipoTag = produto.tipo === 'unidade' ? 
+                    `<span class="unidade-tag">Unidade</span>` : 
                     `<span class="garrafa-tag">Garrafa</span>`;
                 
-                const estoqueInfo = produto.tipo === 'dose' ? 
-                    `${produto.estoque} doses` : 
+                const estoqueInfo = produto.tipo === 'unidade' ? 
+                    `${produto.estoque} unidades` : 
                     `${produto.estoque} garrafas`;
                 
                 tr.innerHTML = `
@@ -1344,7 +1498,7 @@
             
             // Validações
             if (!produtoId) {
-                mostrarMensagem(mensagemElemento, 'Selecione um vinho!', 'erro');
+                mostrarMensagem(mensagemElemento, 'Selecione uma bebida!', 'erro');
                 return;
             }
             
@@ -1357,8 +1511,8 @@
             
             // Validações específicas por tipo
             if (quantidade > produto.estoque) {
-                const estoqueMsg = produto.tipo === 'dose' ? 
-                    `${produto.estoque} doses disponíveis` : 
+                const estoqueMsg = produto.tipo === 'unidade' ? 
+                    `${produto.estoque} unidades disponíveis` : 
                     `${produto.estoque} garrafas disponíveis`;
                 mostrarMensagem(mensagemElemento, `Estoque insuficiente! ${estoqueMsg}`, 'erro');
                 return;
@@ -1375,7 +1529,7 @@
                 id: Date.now(),
                 tipo: 'venda',
                 data: new Date().toISOString().split('T')[0],
-                descricao: `Venda de ${quantidade} ${produto.tipo === 'dose' ? 'doses' : 'garrafas'} de ${produto.nome}`,
+                descricao: `Venda de ${quantidade} ${produto.tipo === 'unidade' ? 'unidades' : 'garrafas'} de ${produto.nome}`,
                 valor: valorVenda,
                 produtoId: produto.id,
                 quantidade
@@ -1392,7 +1546,7 @@
             quantidadeInput.value = '';
             document.getElementById('preco-total').value = '';
             document.getElementById('pesquisa-produto').value = '';
-            document.getElementById('info-produto').innerHTML = '<p><i class="fas fa-info-circle"></i> Selecione um vinho para ver detalhes</p>';
+            document.getElementById('info-produto').innerHTML = '<p><i class="fas fa-info-circle"></i> Selecione uma bebida para ver detalhes</p>';
             
             // Atualizar interfaces
             carregarProdutosVenda();
@@ -1455,7 +1609,7 @@
             
             // Validações
             if (!nome) {
-                mostrarMensagem(mensagemElemento, 'Informe o nome do vinho!', 'erro');
+                mostrarMensagem(mensagemElemento, 'Informe o nome do produto!', 'erro');
                 return;
             }
             
@@ -1481,10 +1635,10 @@
             
             // Obter estoque baseado no tipo
             let estoque;
-            if (tipoProdutoAtual === 'dose') {
-                estoque = parseInt(document.getElementById('doses-total').value);
+            if (tipoProdutoAtual === 'unidade') {
+                estoque = parseInt(document.getElementById('unidades-total').value);
                 if (isNaN(estoque) || estoque <= 0 || !Number.isInteger(estoque)) {
-                    mostrarMensagem(mensagemElemento, 'Informe uma quantidade de doses válida!', 'erro');
+                    mostrarMensagem(mensagemElemento, 'Informe uma quantidade de unidades válida!', 'erro');
                     return;
                 }
             } else {
@@ -1505,7 +1659,7 @@
                 produto.tipo = tipoProdutoAtual;
                 produto.estoqueMinimo = estoqueMinimo;
                 
-                mostrarMensagem(mensagemElemento, 'Vinho atualizado com sucesso!', 'sucesso');
+                mostrarMensagem(mensagemElemento, 'Produto atualizado com sucesso!', 'sucesso');
                 produtoEditando = null;
             } else {
                 // Adicionar novo produto
@@ -1520,7 +1674,7 @@
                 };
                 
                 produtos.push(novoProduto);
-                mostrarMensagem(mensagemElemento, 'Vinho adicionado com sucesso!', 'sucesso');
+                mostrarMensagem(mensagemElemento, 'Produto adicionado com sucesso!', 'sucesso');
             }
             
             // Salvar e atualizar
@@ -1548,25 +1702,25 @@
                 }
             });
             
-            if (produto.tipo === 'dose') {
-                document.getElementById('doses-total').value = produto.estoque;
-                document.getElementById('container-doses').style.display = 'block';
+            if (produto.tipo === 'unidade') {
+                document.getElementById('unidades-total').value = produto.estoque;
+                document.getElementById('container-unidades').style.display = 'block';
                 document.getElementById('container-garrafas').style.display = 'none';
             } else {
                 document.getElementById('garrafas-total').value = produto.estoque;
-                document.getElementById('container-doses').style.display = 'none';
+                document.getElementById('container-unidades').style.display = 'none';
                 document.getElementById('container-garrafas').style.display = 'block';
             }
             
             produtoEditando = id;
-            document.getElementById('btn-salvar-produto').innerHTML = '<i class="fas fa-save"></i> Atualizar Vinho';
+            document.getElementById('btn-salvar-produto').innerHTML = '<i class="fas fa-save"></i> Atualizar Produto';
             
             // Scroll para o formulário
             document.getElementById('nome-produto').focus();
         }
         
         function excluirProduto(id) {
-            if (!confirm('Tem certeza que deseja excluir este vinho?')) return;
+            if (!confirm('Tem certeza que deseja excluir este produto?')) return;
             
             produtos = produtos.filter(p => p.id !== id);
             salvarDados();
@@ -1578,14 +1732,14 @@
         
         function limparFormularioProduto() {
             document.getElementById('nome-produto').value = '';
-            document.getElementById('doses-total').value = '';
+            document.getElementById('unidades-total').value = '';
             document.getElementById('garrafas-total').value = '';
             document.getElementById('preco-compra').value = '';
             document.getElementById('preco-venda').value = '';
             document.getElementById('estoque-minimo').value = '5';
             document.getElementById('mensagem-produto').textContent = '';
             produtoEditando = null;
-            document.getElementById('btn-salvar-produto').innerHTML = '<i class="fas fa-save"></i> Salvar Vinho';
+            document.getElementById('btn-salvar-produto').innerHTML = '<i class="fas fa-save"></i> Salvar Produto';
             
             // Resetar para garrafa
             tipoProdutoAtual = 'garrafa';
@@ -1595,7 +1749,7 @@
                     btn.classList.add('ativo');
                 }
             });
-            document.getElementById('container-doses').style.display = 'none';
+            document.getElementById('container-unidades').style.display = 'none';
             document.getElementById('container-garrafas').style.display = 'block';
         }
         
@@ -1612,7 +1766,7 @@
             
             const a = document.createElement('a');
             a.href = url;
-            a.download = `vinharia-dados-${new Date().toISOString().slice(0, 10)}.json`;
+            a.download = `adega-dados-${new Date().toISOString().slice(0, 10)}.json`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -1710,57 +1864,40 @@
             // Atualizar informações do produto
             let infoHTML = `
                 <p><strong>${produto.nome}</strong></p>
-                <p>Tipo: ${produto.tipo === 'dose' ? 'Venda por dose' : 'Venda por garrafa'}</p>
-                <p>Preço por ${produto.tipo === 'dose' ? 'dose' : 'garrafa'}: ${formatarMoeda(produto.precoVenda)}</p>
-                <p>Estoque disponível: ${produto.tipo === 'dose' ? produto.estoque + ' doses' : produto.estoque + ' garrafas'}</p>
+                <p>Tipo: ${produto.tipo === 'unidade' ? 'Venda por unidade' : 'Venda por garrafa'}</p>
+                <p>Preço por ${produto.tipo === 'unidade' ? 'unidade' : 'garrafa'}: ${formatarMoeda(produto.precoVenda)}</p>
+                <p>Estoque disponível: ${produto.tipo === 'unidade' ? produto.estoque + ' unidades' : produto.estoque + ' garrafas'}</p>
             `;
             document.getElementById('info-produto').innerHTML = infoHTML;
             
             // Atualizar label de quantidade
             document.getElementById('label-quantidade').textContent = 
-                produto.tipo === 'dose' ? 'Quantidade (doses):' : 'Quantidade (garrafas):';
+                produto.tipo === 'unidade' ? 'Quantidade (unidades):' : 'Quantidade (garrafas):';
         }
         
         function configurarEventListeners() {
-            // Navegação
-            navBtns.forEach(btn => {
-                btn.addEventListener('click', function() {
-                    // Remover classe ativa de todos
-                    navBtns.forEach(b => b.classList.remove('ativo'));
-                    
-                    // Adicionar classe ativa ao clicado
-                    this.classList.add('ativo');
-                    
-                    // Mover para a seção correspondente
-                    const secaoId = this.getAttribute('data-secao');
-                    const secaoIndex = Array.from(navBtns).findIndex(b => b === this);
-                    secoes.style.transform = `translateX(-${secaoIndex * 100}%)`;
-                });
+            // Função para mudar de seção
+            function mudarSecao(index) {
+                // Remover classe ativa de todos
+                navBtns.forEach(b => b.classList.remove('ativo'));
+                mobileNavBtns.forEach(b => b.classList.remove('ativo'));
+                
+                // Adicionar classe ativa ao clicado
+                navBtns[index].classList.add('ativo');
+                mobileNavBtns[index].classList.add('ativo');
+                
+                // Mover para a seção correspondente
+                secoes.style.transform = `translateX(-${index * 25}%)`;
+            }
+            
+            // Navegação superior
+            navBtns.forEach((btn, index) => {
+                btn.addEventListener('click', () => mudarSecao(index));
             });
             
-            // Swipe para dispositivos móveis
-            let touchStartX = 0;
-            
-            secoes.addEventListener('touchstart', e => {
-                touchStartX = e.changedTouches[0].screenX;
-            });
-            
-            secoes.addEventListener('touchend', e => {
-                const touchEndX = e.changedTouches[0].screenX;
-                const diff = touchStartX - touchEndX;
-                const limite = 50; // Sensibilidade do swipe
-                
-                if (Math.abs(diff) < limite) return;
-                
-                const ativoIndex = Array.from(navBtns).findIndex(b => b.classList.contains('ativo'));
-                
-                if (diff > 0 && ativoIndex < navBtns.length - 1) {
-                    // Swipe para esquerda - próxima seção
-                    navBtns[ativoIndex + 1].click();
-                } else if (diff < 0 && ativoIndex > 0) {
-                    // Swipe para direita - seção anterior
-                    navBtns[ativoIndex - 1].click();
-                }
+            // Navegação móvel inferior
+            mobileNavBtns.forEach((btn, index) => {
+                btn.addEventListener('click', () => mudarSecao(index));
             });
             
             // Botões
@@ -1790,11 +1927,11 @@
                     document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('ativo'));
                     this.classList.add('ativo');
                     
-                    if (tipoProdutoAtual === 'dose') {
-                        document.getElementById('container-doses').style.display = 'block';
+                    if (tipoProdutoAtual === 'unidade') {
+                        document.getElementById('container-unidades').style.display = 'block';
                         document.getElementById('container-garrafas').style.display = 'none';
                     } else {
-                        document.getElementById('container-doses').style.display = 'none';
+                        document.getElementById('container-unidades').style.display = 'none';
                         document.getElementById('container-garrafas').style.display = 'block';
                     }
                 });
@@ -1829,7 +1966,7 @@
                             window.backupData = dados;
                         } else {
                             document.getElementById('restore-message').innerHTML = 
-                                `<div class="erro">Arquivo inválido! Certifique-se de que é um backup da Vinharia.</div>`;
+                                `<div class="erro">Arquivo inválido! Certifique-se de que é um backup da Adega.</div>`;
                             document.getElementById('btn-confirmar-restore').disabled = true;
                         }
                     } catch (error) {
