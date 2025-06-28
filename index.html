@@ -1,0 +1,1884 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vinharia Elegante - Sistema de Gestão</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --cor-primaria: #8B0000; /* Vinho escuro */
+            --cor-secundaria: #C0A080; /* Dourado */
+            --cor-ternaria: #4B3621; /* Marrom */
+            --cor-texto: #333;
+            --cor-fundo: #f9f5f0; /* Bege claro */
+            --cor-card: #fff;
+            --cor-borda: #d7c9b9; /* Bege médio */
+            --cor-alerta: #d9534f;
+            --cor-sucesso: #5cb85c;
+            --cor-aviso: #f0ad4e;
+            --cor-info: #5bc0de;
+            --sombra: 0 2px 10px rgba(0,0,0,0.1);
+            --transicao: all 0.3s ease;
+        }
+
+        [data-tema="escuro"] {
+            --cor-primaria: #6d0f0f;
+            --cor-secundaria: #a8875c;
+            --cor-ternaria: #3a2a18;
+            --cor-texto: #f5f5f5;
+            --cor-fundo: #1a1a1a;
+            --cor-card: #2a2a2a;
+            --cor-borda: #444;
+            --sombra: 0 2px 10px rgba(0,0,0,0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--cor-fundo);
+            color: var(--cor-texto);
+            overflow-x: hidden;
+            transition: var(--transicao);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            position: relative;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--cor-primaria), var(--cor-ternaria));
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: var(--sombra);
+            z-index: 10;
+            position: relative;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .logo-container i {
+            font-size: 2rem;
+        }
+
+        .navegacao {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 1rem;
+            background-color: rgba(255,255,255,0.1);
+            border-radius: 50px;
+            padding: 5px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            color: white;
+            padding: 10px 15px;
+            border-radius: 50px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transicao);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            min-width: max-content;
+        }
+
+        .nav-btn.ativo {
+            background-color: white;
+            color: var(--cor-primaria);
+        }
+
+        .secoes {
+            display: flex;
+            flex: 1;
+            transition: transform 0.4s ease;
+            overflow: hidden;
+        }
+
+        .secao {
+            min-width: 100%;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.2rem;
+        }
+
+        .secao-titulo {
+            color: var(--cor-primaria);
+            border-bottom: 2px solid var(--cor-primaria);
+            padding-bottom: 0.5rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+        }
+
+        .card {
+            background-color: var(--cor-card);
+            border-radius: 10px;
+            padding: 1.2rem;
+            box-shadow: var(--sombra);
+            position: relative;
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+            position: relative;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.4rem;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        input, select, button, textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--cor-borda);
+            font-size: 0.95rem;
+            background-color: var(--cor-card);
+            color: var(--cor-texto);
+        }
+
+        button {
+            background-color: var(--cor-primaria);
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: var(--transicao);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px;
+        }
+
+        button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        button.btn-secundario {
+            background-color: var(--cor-secundaria);
+            color: #333;
+        }
+
+        button.btn-ternario {
+            background-color: var(--cor-ternaria);
+        }
+
+        button.btn-alerta {
+            background-color: var(--cor-alerta);
+        }
+
+        .botoes-acao {
+            display: flex;
+            gap: 8px;
+            margin-top: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .botoes-acao button {
+            flex: 1;
+            min-width: 120px;
+        }
+
+        .mensagem {
+            padding: 0.8rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            font-size: 0.9rem;
+        }
+
+        .sucesso {
+            background-color: rgba(92, 184, 92, 0.2);
+            border: 1px solid var(--cor-sucesso);
+        }
+
+        .erro {
+            background-color: rgba(217, 83, 79, 0.2);
+            border: 1px solid var(--cor-alerta);
+        }
+
+        .info {
+            background-color: rgba(91, 192, 222, 0.2);
+            border: 1px solid var(--cor-info);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+            font-size: 0.85rem;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid var(--cor-borda);
+        }
+
+        th {
+            background-color: rgba(139, 0, 0, 0.1);
+        }
+
+        .estoque-baixo {
+            background-color: rgba(217, 83, 79, 0.1);
+            color: var(--cor-alerta);
+            font-weight: bold;
+        }
+
+        .garrafa-tag {
+            background-color: rgba(192, 160, 128, 0.2);
+            color: var(--cor-secundaria);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .dose-tag {
+            background-color: rgba(75, 54, 33, 0.2);
+            color: var(--cor-ternaria);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .grafico-container {
+            height: 250px;
+            margin: 1.2rem 0;
+        }
+
+        .controles {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .controles button {
+            width: auto;
+            padding: 8px 12px;
+            font-size: 0.85rem;
+        }
+
+        .tema-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background-color: var(--cor-card);
+            color: var(--cor-texto);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: var(--sombra);
+            z-index: 100;
+        }
+
+        .valor-oculto {
+            filter: blur(5px);
+            transition: var(--transicao);
+        }
+
+        .valor-visivel {
+            filter: none;
+        }
+
+        .tipo-toggle {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .tipo-btn {
+            flex: 1;
+            padding: 8px;
+            text-align: center;
+            border: 2px solid var(--cor-borda);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transicao);
+            font-size: 0.85rem;
+        }
+
+        .tipo-btn.ativo {
+            border-color: var(--cor-primaria);
+            background-color: rgba(139, 0, 0, 0.1);
+        }
+
+        .info-card {
+            background-color: rgba(240, 173, 78, 0.1);
+            border-left: 4px solid var(--cor-aviso);
+            padding: 0.8rem;
+            margin-top: 1rem;
+            border-radius: 0 8px 8px 0;
+            font-size: 0.9rem;
+        }
+
+        .backup-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+            padding: 8px;
+            background-color: rgba(91, 192, 222, 0.1);
+            border-radius: 8px;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+        
+        .status-sucesso {
+            background-color: rgba(92, 184, 92, 0.2);
+            color: var(--cor-sucesso);
+        }
+        
+        .status-alerta {
+            background-color: rgba(240, 173, 78, 0.2);
+            color: var(--cor-aviso);
+        }
+        
+        .status-erro {
+            background-color: rgba(217, 83, 79, 0.2);
+            color: var(--cor-alerta);
+        }
+        
+        /* Estilos de pesquisa */
+        .search-container {
+            position: relative;
+            margin-bottom: 12px;
+        }
+        
+        .search-container input {
+            padding-right: 40px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #777;
+            cursor: pointer;
+        }
+        
+        .search-results {
+            position: absolute;
+            width: 100%;
+            max-height: 150px;
+            overflow-y: auto;
+            background: var(--cor-card);
+            border: 1px solid var(--cor-borda);
+            border-radius: 8px;
+            box-shadow: var(--sombra);
+            z-index: 100;
+            display: none;
+        }
+        
+        .search-results.visible {
+            display: block;
+        }
+        
+        .search-item {
+            padding: 8px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--cor-borda);
+            font-size: 0.9rem;
+        }
+        
+        .search-item:hover {
+            background-color: rgba(139, 0, 0, 0.1);
+        }
+        
+        .expand-button {
+            display: block;
+            width: 100%;
+            text-align: center;
+            padding: 6px;
+            background: rgba(139, 0, 0, 0.1);
+            color: var(--cor-primaria);
+            border-radius: 0 0 8px 8px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+        
+        /* Modal de carregamento */
+        .modal-carregamento {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-conteudo {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 0 15px rgba(0,0,0,0.3);
+            max-width: 90%;
+        }
+        
+        .carregando {
+            font-size: 18px;
+            margin-top: 10px;
+            color: #333;
+        }
+        
+        /* Responsividade */
+        @media (max-width: 768px) {
+            .secao {
+                padding: 0.8rem;
+            }
+            
+            .card {
+                padding: 0.8rem;
+            }
+            
+            .nav-btn {
+                padding: 8px 10px;
+                font-size: 0.8rem;
+            }
+            
+            .controles {
+                flex-direction: column;
+            }
+            
+            .controles button {
+                width: 100%;
+            }
+            
+            .tipo-toggle {
+                flex-direction: column;
+            }
+            
+            .botoes-acao button {
+                min-width: 100%;
+            }
+            
+            table {
+                font-size: 0.8rem;
+            }
+            
+            th, td {
+                padding: 8px 6px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo-container h1 {
+                font-size: 1.5rem;
+            }
+            
+            .nav-btn span {
+                display: none;
+            }
+            
+            .nav-btn i {
+                margin-right: 0;
+            }
+            
+            .secao-titulo {
+                font-size: 1.2rem;
+            }
+            
+            .tema-btn {
+                top: 10px;
+                right: 10px;
+                width: 32px;
+                height: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tema-btn" id="tema-btn">🌙</div>
+        
+        <!-- Modal de carregamento -->
+        <div class="modal-carregamento" id="modal-carregamento">
+            <div class="modal-conteudo">
+                <i class="fas fa-wine-bottle fa-spin fa-3x" style="color: #8B0000;"></i>
+                <div class="carregando">Gerando relatório PDF...</div>
+            </div>
+        </div>
+        
+        <header>
+            <div class="logo-container">
+                <i class="fas fa-wine-bottle"></i>
+                <h1>Vinharia Elegante</h1>
+            </div>
+            <div class="navegacao">
+                <button class="nav-btn ativo" data-secao="vendas">
+                    <i class="fas fa-cash-register"></i> <span>Vendas</span>
+                </button>
+                <button class="nav-btn" data-secao="financas">
+                    <i class="fas fa-chart-line"></i> <span>Finanças</span>
+                </button>
+                <button class="nav-btn" data-secao="estoque">
+                    <i class="fas fa-warehouse"></i> <span>Estoque</span>
+                </button>
+                <button class="nav-btn" data-secao="backup">
+                    <i class="fas fa-database"></i> <span>Backup</span>
+                </button>
+            </div>
+        </header>
+        
+        <div class="secoes" id="secoes">
+            <!-- Seção de Vendas -->
+            <section class="secao" id="vendas">
+                <h2 class="secao-titulo"><i class="fas fa-wine-glass"></i> Registro de Vendas</h2>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3>Nova Venda</h3>
+                        <span class="status-badge status-sucesso" id="status-estoque">Estoque Atualizado</span>
+                    </div>
+                    
+                    <div class="search-container">
+                        <input type="text" id="pesquisa-produto" placeholder="Pesquisar vinho...">
+                        <i class="fas fa-search search-icon" id="pesquisa-produto-icon"></i>
+                        <div class="search-results" id="resultados-pesquisa"></div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <select id="produto-venda" required>
+                            <option value="">Selecione um vinho</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label id="label-quantidade">Quantidade:</label>
+                        <input type="number" id="quantidade-venda" min="0.01" step="0.01" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="preco-total">Preço Total (R$):</label>
+                        <input type="text" id="preco-total" readonly>
+                    </div>
+                    
+                    <div id="info-produto" class="info-card">
+                        <p><i class="fas fa-info-circle"></i> Selecione um vinho para ver detalhes</p>
+                    </div>
+                    
+                    <div id="mensagem-venda" class="mensagem"></div>
+                    
+                    <div class="botoes-acao">
+                        <button id="btn-vender">
+                            <i class="fas fa-check"></i> Registrar Venda
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3><i class="fas fa-lightbulb"></i> Instruções</h3>
+                    <p>1. Selecione o vinho na lista</p>
+                    <p>2. Informe a quantidade em garrafas ou doses</p>
+                    <p>3. O preço total será calculado automaticamente</p>
+                    <p>4. Clique em "Registrar Venda" para confirmar</p>
+                </div>
+            </section>
+            
+            <!-- Seção de Finanças -->
+            <section class="secao" id="financas">
+                <h2 class="secao-titulo"><i class="fas fa-chart-pie"></i> Finanças</h2>
+                
+                <div class="card">
+                    <div class="controles">
+                        <button id="btn-ocultar-valores">
+                            <i class="fas fa-eye-slash"></i> Ocultar Valores
+                        </button>
+                        <button class="btn-secundario" id="btn-exportar-financas">
+                            <i class="fas fa-file-pdf"></i> Exportar PDF
+                        </button>
+                        <button class="btn-alerta" id="btn-limpar-financas">
+                            <i class="fas fa-trash"></i> Limpar Finanças
+                        </button>
+                    </div>
+                    
+                    <div class="resumo-financas">
+                        <h3>Resumo Financeiro</h3>
+                        <p>Vendas: <span id="total-vendas" class="valor-visivel">R$ 0,00</span></p>
+                        <p>Despesas: <span id="total-despesas" class="valor-visivel">R$ 0,00</span></p>
+                        <p>Saldo: <span id="saldo" class="valor-visivel">R$ 0,00</span></p>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3><i class="fas fa-plus-circle"></i> Registrar Transação</h3>
+                    
+                    <div class="form-group">
+                        <label for="tipo-transacao">Tipo:</label>
+                        <select id="tipo-transacao" required>
+                            <option value="venda">Venda</option>
+                            <option value="despesa">Despesa</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="data-transacao">Data:</label>
+                        <input type="date" id="data-transacao" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="descricao-transacao">Descrição:</label>
+                        <input type="text" id="descricao-transacao" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="valor-transacao">Valor (R$):</label>
+                        <input type="number" id="valor-transacao" min="0.01" step="0.01" required>
+                    </div>
+                    
+                    <button id="btn-registrar-transacao">
+                        <i class="fas fa-save"></i> Registrar
+                    </button>
+                </div>
+                
+                <div class="card">
+                    <h3><i class="fas fa-chart-pie"></i> Gráfico Financeiro</h3>
+                    
+                    <div class="form-group">
+                        <label for="mes-grafico">Mês:</label>
+                        <input type="month" id="mes-grafico">
+                    </div>
+                    
+                    <div class="grafico-container">
+                        <canvas id="grafico-pizza"></canvas>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Seção de Estoque -->
+            <section class="secao" id="estoque">
+                <h2 class="secao-titulo"><i class="fas fa-wine-bottle"></i> Gerenciamento de Estoque</h2>
+                
+                <div class="card">
+                    <h3><i class="fas fa-plus"></i> Adicionar/Editar Vinho</h3>
+                    
+                    <div class="tipo-toggle">
+                        <div class="tipo-btn ativo" data-tipo="dose">
+                            <i class="fas fa-glass"></i> Venda por Dose
+                        </div>
+                        <div class="tipo-btn" data-tipo="garrafa">
+                            <i class="fas fa-wine-bottle"></i> Garrafa
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="nome-produto">Nome do Vinho:</label>
+                        <input type="text" id="nome-produto" required>
+                    </div>
+                    
+                    <div class="form-group" id="container-doses" style="display: none;">
+                        <label for="doses-total">Quantidade de Doses:</label>
+                        <input type="number" id="doses-total" min="1" step="1" required>
+                    </div>
+                    
+                    <div class="form-group" id="container-garrafas">
+                        <label for="garrafas-total">Quantidade de Garrafas:</label>
+                        <input type="number" id="garrafas-total" min="1" step="1" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="preco-compra">Preço de Compra (por unidade):</label>
+                        <input type="number" id="preco-compra" min="0.01" step="0.01" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="preco-venda">Preço de Venda (por unidade):</label>
+                        <input type="number" id="preco-venda" min="0.01" step="0.01" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="estoque-minimo">Estoque Mínimo:</label>
+                        <input type="number" id="estoque-minimo" min="1" step="1" required>
+                    </div>
+                    
+                    <div id="mensagem-produto" class="mensagem"></div>
+                    
+                    <div class="botoes-acao">
+                        <button id="btn-salvar-produto">
+                            <i class="fas fa-save"></i> Salvar Vinho
+                        </button>
+                        <button id="btn-limpar-form">
+                            <i class="fas fa-broom"></i> Limpar
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="search-container">
+                        <input type="text" id="pesquisa-estoque" placeholder="Pesquisar vinho no estoque...">
+                        <i class="fas fa-search search-icon"></i>
+                    </div>
+                    
+                    <h3><i class="fas fa-list"></i> Lista de Vinhos em Estoque</h3>
+                    
+                    <div style="overflow-x: auto;">
+                        <table id="tabela-estoque">
+                            <thead>
+                                <tr>
+                                    <th>Vinho</th>
+                                    <th>Tipo</th>
+                                    <th>Estoque</th>
+                                    <th>Preço Venda</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Produtos carregados dinamicamente -->
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="controles">
+                        <button id="btn-exportar-dados">
+                            <i class="fas fa-file-download"></i> Exportar Dados
+                        </button>
+                    </div>
+                </div>
+            </section>
+            
+            <!-- Seção de Backup -->
+            <section class="secao" id="backup">
+                <h2 class="secao-titulo"><i class="fas fa-database"></i> Backup e Segurança</h2>
+                
+                <div class="card">
+                    <h3><i class="fas fa-shield-alt"></i> Sistema de Backup</h3>
+                    
+                    <div class="info-card">
+                        <p><i class="fas fa-info-circle"></i> Os dados são salvos automaticamente no seu navegador, mas recomendamos fazer backups regulares para evitar perda de informações.</p>
+                    </div>
+                    
+                    <div class="backup-info">
+                        <i class="fas fa-sync-alt fa-2x"></i>
+                        <div>
+                            <h4>Último Backup Automático</h4>
+                            <p id="ultimo-backup">Nenhum backup realizado ainda</p>
+                        </div>
+                    </div>
+                    
+                    <div class="botoes-acao">
+                        <button id="btn-backup-agora" class="btn-secundario">
+                            <i class="fas fa-save"></i> Fazer Backup Agora
+                        </button>
+                        <button id="btn-restaurar-backup" class="btn-ternario">
+                            <i class="fas fa-undo"></i> Restaurar Backup
+                        </button>
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: 20px;">
+                        <label for="intervalo-backup">Frequência de Backup Automático:</label>
+                        <select id="intervalo-backup">
+                            <option value="diario">Diário</option>
+                            <option value="semanal" selected>Semanal</option>
+                            <option value="mensal">Mensal</option>
+                            <option value="desativado">Desativado</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <h3><i class="fas fa-file-export"></i> Exportar Dados</h3>
+                    <p>Exporte todos os dados do sistema para um arquivo JSON que pode ser armazenado em seu computador ou em um serviço de nuvem.</p>
+                    <button id="btn-exportar-completo">
+                        <i class="fas fa-file-download"></i> Exportar Dados Completos
+                    </button>
+                    
+                    <div class="info-card" style="margin-top: 20px;">
+                        <h4><i class="fas fa-lightbulb"></i> Dicas de Segurança</h4>
+                        <p>1. Faça backups regulares e armazene em locais diferentes</p>
+                        <p>2. Use um serviço de nuvem (Google Drive, Dropbox) para armazenar backups</p>
+                        <p>3. Não compartilhe seus arquivos de backup com terceiros</p>
+                        <p>4. Mantenha seu navegador atualizado para evitar problemas de segurança</p>
+                    </div>
+                </div>
+                
+                <div class="card" style="display: none;" id="restore-panel">
+                    <h3><i class="fas fa-file-import"></i> Restaurar Backup</h3>
+                    <div class="form-group">
+                        <label for="arquivo-backup">Selecione o arquivo de backup (.json):</label>
+                        <input type="file" id="arquivo-backup" accept=".json">
+                    </div>
+                    <button id="btn-confirmar-restore" class="btn-alerta">
+                        <i class="fas fa-check"></i> Confirmar Restauração
+                    </button>
+                    <div id="restore-message" class="mensagem" style="margin-top: 15px;"></div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <script>
+        // Variáveis globais
+        let produtos = JSON.parse(localStorage.getItem('produtos')) || [];
+        let transacoes = JSON.parse(localStorage.getItem('transacoes')) || [];
+        let configuracoes = JSON.parse(localStorage.getItem('configuracoes')) || {
+            backupInterval: 'semanal', // Backup semanal por padrão
+            ultimoBackup: null
+        };
+        
+        let valoresOcultos = false;
+        let produtoEditando = null;
+        let graficoPizza = null;
+        let temaEscuro = localStorage.getItem('temaEscuro') === 'true';
+        let tipoProdutoAtual = 'garrafa';
+        
+        // Elementos DOM
+        const secoes = document.getElementById('secoes');
+        const navBtns = document.querySelectorAll('.nav-btn');
+        const temaBtn = document.getElementById('tema-btn');
+        const modalCarregamento = document.getElementById('modal-carregamento');
+        
+        // Inicialização
+        document.addEventListener('DOMContentLoaded', function() {
+            // Configurar tema
+            if (temaEscuro) {
+                document.body.setAttribute('data-tema', 'escuro');
+                temaBtn.textContent = '☀️';
+            } else {
+                temaBtn.textContent = '🌙';
+            }
+            
+            // Carregar dados
+            carregarProdutosVenda();
+            atualizarTabelaEstoque();
+            atualizarResumoFinancas();
+            configurarGrafico();
+            
+            // Configurar data atual
+            document.getElementById('data-transacao').value = new Date().toISOString().split('T')[0];
+            document.getElementById('mes-grafico').value = new Date().toISOString().slice(0, 7);
+            
+            // Configurar backup
+            document.getElementById('intervalo-backup').value = configuracoes.backupInterval;
+            if (configuracoes.ultimoBackup) {
+                const dataBackup = new Date(configuracoes.ultimoBackup);
+                document.getElementById('ultimo-backup').textContent = 
+                    `Último backup em: ${dataBackup.toLocaleDateString()} às ${dataBackup.toLocaleTimeString()}`;
+            }
+            
+            // Configurar pesquisas
+            configurarPesquisas();
+            
+            // Event listeners
+            configurarEventListeners();
+            
+            // Atualizar gráfico
+            atualizarGrafico();
+            
+            // Iniciar sistema de backup automático
+            iniciarBackupAutomatico();
+        });
+        
+        // Funções para pesquisas
+        function configurarPesquisas() {
+            // Pesquisa na seção de vendas
+            const pesquisaInput = document.getElementById('pesquisa-produto');
+            const resultadosDiv = document.getElementById('resultados-pesquisa');
+            const produtoSelect = document.getElementById('produto-venda');
+            const pesquisaIcon = document.getElementById('pesquisa-produto-icon');
+            
+            pesquisaInput.addEventListener('input', function() {
+                const termo = this.value.toLowerCase();
+                if (termo.length < 2) {
+                    resultadosDiv.classList.remove('visible');
+                    return;
+                }
+                
+                const resultados = produtos.filter(produto => 
+                    produto.nome.toLowerCase().includes(termo)
+                );
+                
+                mostrarResultadosPesquisa(resultados);
+            });
+            
+            pesquisaIcon.addEventListener('click', function() {
+                if (resultadosDiv.classList.contains('visible')) {
+                    resultadosDiv.classList.remove('visible');
+                } else {
+                    mostrarResultadosPesquisa(produtos);
+                }
+            });
+            
+            // Pesquisa na seção de estoque
+            const pesquisaEstoque = document.getElementById('pesquisa-estoque');
+            pesquisaEstoque.addEventListener('input', function() {
+                const termo = this.value.toLowerCase();
+                const linhas = document.querySelectorAll('#tabela-estoque tbody tr');
+                
+                linhas.forEach(linha => {
+                    const nomeProduto = linha.cells[0].textContent.toLowerCase();
+                    if (nomeProduto.includes(termo)) {
+                        linha.style.display = '';
+                    } else {
+                        linha.style.display = 'none';
+                    }
+                });
+            });
+        }
+        
+        function mostrarResultadosPesquisa(resultados) {
+            const resultadosDiv = document.getElementById('resultados-pesquisa');
+            resultadosDiv.innerHTML = '';
+            
+            if (resultados.length === 0) {
+                resultadosDiv.innerHTML = '<div class="search-item">Nenhum vinho encontrado</div>';
+                resultadosDiv.classList.add('visible');
+                return;
+            }
+            
+            resultados.slice(0, 10).forEach(produto => {
+                const div = document.createElement('div');
+                div.className = 'search-item';
+                div.textContent = produto.nome;
+                div.dataset.id = produto.id;
+                div.dataset.tipo = produto.tipo;
+                
+                div.addEventListener('click', function() {
+                    document.getElementById('pesquisa-produto').value = produto.nome;
+                    document.getElementById('produto-venda').value = produto.id;
+                    resultadosDiv.classList.remove('visible');
+                    calcularPreco();
+                });
+                
+                resultadosDiv.appendChild(div);
+            });
+            
+            if (resultados.length > 10) {
+                const expandDiv = document.createElement('div');
+                expandDiv.className = 'expand-button';
+                expandDiv.innerHTML = `Mostrar todos (${resultados.length}) <i class="fas fa-chevron-down"></i>`;
+                
+                expandDiv.addEventListener('click', function() {
+                    resultadosDiv.innerHTML = '';
+                    resultados.forEach(produto => {
+                        const div = document.createElement('div');
+                        div.className = 'search-item';
+                        div.textContent = produto.nome;
+                        div.dataset.id = produto.id;
+                        div.dataset.tipo = produto.tipo;
+                        
+                        div.addEventListener('click', function() {
+                            document.getElementById('pesquisa-produto').value = produto.nome;
+                            document.getElementById('produto-venda').value = produto.id;
+                            resultadosDiv.classList.remove('visible');
+                            calcularPreco();
+                        });
+                        
+                        resultadosDiv.appendChild(div);
+                    });
+                });
+                
+                resultadosDiv.appendChild(expandDiv);
+            }
+            
+            resultadosDiv.classList.add('visible');
+        }
+        
+        // Função para limpar finanças
+        function limparFinancas() {
+            if (confirm('Tem certeza que deseja limpar todos os dados financeiros? Esta ação não pode ser desfeita.')) {
+                transacoes = [];
+                salvarDados();
+                atualizarResumoFinancas();
+                atualizarGrafico();
+                alert('Dados financeiros limpos com sucesso!');
+            }
+        }
+        
+        // Função para gerar relatório financeiro em PDF
+        async function gerarRelatorioPDF() {
+            // Exibir modal de carregamento
+            modalCarregamento.style.display = 'flex';
+            
+            try {
+                // Criar conteúdo do relatório
+                const mesSelecionado = document.getElementById('mes-grafico').value;
+                const dataAtual = new Date().toLocaleDateString('pt-BR');
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                // Configurações do documento
+                doc.setFontSize(22);
+                doc.setTextColor(139, 0, 0); // Vinho
+                doc.text('Relatório Financeiro - Vinharia', 105, 20, null, null, 'center');
+                
+                doc.setFontSize(12);
+                doc.setTextColor(100);
+                doc.text(`Mês: ${mesSelecionado}`, 105, 28, null, null, 'center');
+                doc.text(`Gerado em: ${dataAtual}`, 105, 35, null, null, 'center');
+                
+                // Adicionar resumo financeiro
+                doc.setFontSize(16);
+                doc.setTextColor(0);
+                doc.text('Resumo Financeiro', 20, 50);
+                
+                doc.setFontSize(12);
+                doc.text(`Vendas: ${document.getElementById('total-vendas').textContent}`, 20, 60);
+                doc.text(`Despesas: ${document.getElementById('total-despesas').textContent}`, 20, 68);
+                doc.text(`Saldo: ${document.getElementById('saldo').textContent}`, 20, 76);
+                
+                // Adicionar gráfico
+                const canvas = document.createElement('canvas');
+                canvas.width = 600;
+                canvas.height = 400;
+                const ctx = canvas.getContext('2d');
+                
+                // Renderizar gráfico para impressão
+                const transacoesMes = transacoes.filter(t => {
+                    const dataTransacao = new Date(t.data);
+                    const mesTransacao = `${dataTransacao.getFullYear()}-${String(dataTransacao.getMonth() + 1).padStart(2, '0')}`;
+                    return mesTransacao === mesSelecionado;
+                });
+                
+                const vendas = transacoesMes
+                    .filter(t => t.tipo === 'venda')
+                    .reduce((total, t) => total + t.valor, 0);
+                
+                const despesas = transacoesMes
+                    .filter(t => t.tipo === 'despesa')
+                    .reduce((total, t) => total + t.valor, 0);
+                
+                new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['Vendas', 'Despesas'],
+                        datasets: [{
+                            data: [vendas, despesas],
+                            backgroundColor: ['#8B0000', '#C0A080']
+                        }]
+                    },
+                    options: {
+                        responsive: false,
+                        plugins: {
+                            legend: {
+                                position: 'top',
+                            },
+                            title: {
+                                display: true,
+                                text: 'Vendas vs Despesas'
+                            }
+                        }
+                    }
+                });
+                
+                // Esperar um pouco para o gráfico renderizar
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                // Converter canvas para imagem
+                const imgData = canvas.toDataURL('image/jpeg', 0.9);
+                doc.addImage(imgData, 'JPEG', 30, 90, 150, 100);
+                
+                // Adicionar tabela de transações
+                doc.setFontSize(16);
+                doc.text('Detalhamento de Transações', 20, 210);
+                
+                // Preparar dados da tabela
+                const tableData = [];
+                const header = [['Data', 'Tipo', 'Descrição', 'Valor (R$)']];
+                
+                transacoesMes.forEach(t => {
+                    const tipo = t.tipo === 'venda' ? 'Venda' : 'Despesa';
+                    const valor = formatarMoeda(t.valor);
+                    tableData.push([t.data, tipo, t.descricao, valor]);
+                });
+                
+                // Adicionar tabela manualmente se não houver transações
+                if (tableData.length === 0) {
+                    doc.setFontSize(12);
+                    doc.text('Nenhuma transação registrada neste período', 20, 220);
+                } else {
+                    // Usar autoTable corretamente
+                    doc.autoTable({
+                        startY: 220,
+                        head: header,
+                        body: tableData,
+                        theme: 'grid',
+                        headStyles: { 
+                            fillColor: [139, 0, 0],
+                            textColor: [255, 255, 255],
+                            fontStyle: 'bold'
+                        },
+                        styles: { 
+                            fontSize: 10, 
+                            cellPadding: 3,
+                            valign: 'middle'
+                        },
+                        columnStyles: {
+                            0: { cellWidth: 30 },
+                            1: { cellWidth: 25 },
+                            2: { cellWidth: 85 },
+                            3: { cellWidth: 30 }
+                        }
+                    });
+                }
+                
+                // Salvar PDF
+                doc.save(`relatorio-financeiro-${mesSelecionado}.pdf`);
+                
+            } catch (error) {
+                console.error('Erro ao gerar PDF:', error);
+                alert('Ocorreu um erro ao gerar o PDF. Verifique o console para mais detalhes.');
+            } finally {
+                // Ocultar modal de carregamento
+                modalCarregamento.style.display = 'none';
+            }
+        }
+
+        // Funções de inicialização
+        function carregarProdutosVenda() {
+            const select = document.getElementById('produto-venda');
+            select.innerHTML = '<option value="">Selecione um vinho</option>';
+            
+            produtos.forEach(produto => {
+                const option = document.createElement('option');
+                option.value = produto.id;
+                option.textContent = `${produto.nome} (${produto.tipo === 'dose' ? produto.estoque + ' doses' : produto.estoque + ' garrafas'})`;
+                option.dataset.tipo = produto.tipo;
+                select.appendChild(option);
+            });
+        }
+        
+        function atualizarTabelaEstoque() {
+            const tbody = document.querySelector('#tabela-estoque tbody');
+            tbody.innerHTML = '';
+            
+            if (produtos.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center;">Nenhum vinho cadastrado</td></tr>`;
+                return;
+            }
+            
+            produtos.forEach(produto => {
+                const tr = document.createElement('tr');
+                if (produto.estoque < produto.estoqueMinimo) {
+                    tr.classList.add('estoque-baixo');
+                }
+                
+                const tipoTag = produto.tipo === 'dose' ? 
+                    `<span class="dose-tag">Dose</span>` : 
+                    `<span class="garrafa-tag">Garrafa</span>`;
+                
+                const estoqueInfo = produto.tipo === 'dose' ? 
+                    `${produto.estoque} doses` : 
+                    `${produto.estoque} garrafas`;
+                
+                tr.innerHTML = `
+                    <td>${produto.nome}</td>
+                    <td>${tipoTag}</td>
+                    <td>${estoqueInfo}</td>
+                    <td>R$ ${produto.precoVenda.toFixed(2)}</td>
+                    <td>
+                        <button class="btn-editar" data-id="${produto.id}">
+                            <i class="fas fa-edit"></i> Editar
+                        </button>
+                        <button class="btn-excluir" data-id="${produto.id}">
+                            <i class="fas fa-trash"></i> Excluir
+                        </button>
+                    </td>
+                `;
+                
+                tbody.appendChild(tr);
+            });
+            
+            // Adicionar event listeners para editar e excluir
+            document.querySelectorAll('.btn-editar').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    editarProduto(id);
+                });
+            });
+            
+            document.querySelectorAll('.btn-excluir').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const id = this.getAttribute('data-id');
+                    excluirProduto(id);
+                });
+            });
+        }
+        
+        function atualizarResumoFinancas() {
+            const vendas = transacoes
+                .filter(t => t.tipo === 'venda')
+                .reduce((total, t) => total + t.valor, 0);
+            
+            const despesas = transacoes
+                .filter(t => t.tipo === 'despesa')
+                .reduce((total, t) => total + t.valor, 0);
+            
+            const saldo = vendas - despesas;
+            
+            document.getElementById('total-vendas').textContent = formatarMoeda(vendas);
+            document.getElementById('total-despesas').textContent = formatarMoeda(despesas);
+            document.getElementById('saldo').textContent = formatarMoeda(saldo);
+        }
+        
+        function configurarGrafico() {
+            const ctx = document.getElementById('grafico-pizza').getContext('2d');
+            graficoPizza = new Chart(ctx, {
+                type: 'pie',
+                data: {
+                    labels: ['Vendas', 'Despesas'],
+                    datasets: [{
+                        data: [0, 0],
+                        backgroundColor: ['#8B0000', '#C0A080']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'Vendas vs Despesas'
+                        }
+                    }
+                }
+            });
+        }
+        
+        function atualizarGrafico() {
+            const mesSelecionado = document.getElementById('mes-grafico').value;
+            
+            const transacoesMes = transacoes.filter(t => {
+                const dataTransacao = new Date(t.data);
+                const mesTransacao = `${dataTransacao.getFullYear()}-${String(dataTransacao.getMonth() + 1).padStart(2, '0')}`;
+                return mesTransacao === mesSelecionado;
+            });
+            
+            const vendas = transacoesMes
+                .filter(t => t.tipo === 'venda')
+                .reduce((total, t) => total + t.valor, 0);
+            
+            const despesas = transacoesMes
+                .filter(t => t.tipo === 'despesa')
+                .reduce((total, t) => total + t.valor, 0);
+            
+            graficoPizza.data.datasets[0].data = [vendas, despesas];
+            graficoPizza.update();
+        }
+        
+        // Funções utilitárias
+        function formatarMoeda(valor) {
+            return `R$ ${valor.toFixed(2).replace('.', ',')}`;
+        }
+        
+        function mostrarMensagem(elemento, mensagem, tipo) {
+            elemento.textContent = mensagem;
+            elemento.className = `mensagem ${tipo}`;
+            
+            setTimeout(() => {
+                elemento.textContent = '';
+                elemento.className = 'mensagem';
+            }, 5000);
+        }
+        
+        // Funções de negócio
+        function registrarVenda() {
+            const produtoSelect = document.getElementById('produto-venda');
+            const quantidadeInput = document.getElementById('quantidade-venda');
+            const mensagemElemento = document.getElementById('mensagem-venda');
+            
+            const produtoId = produtoSelect.value;
+            const quantidade = parseFloat(quantidadeInput.value);
+            
+            // Validações
+            if (!produtoId) {
+                mostrarMensagem(mensagemElemento, 'Selecione um vinho!', 'erro');
+                return;
+            }
+            
+            if (isNaN(quantidade) || quantidade <= 0) {
+                mostrarMensagem(mensagemElemento, 'Informe uma quantidade válida!', 'erro');
+                return;
+            }
+            
+            const produto = produtos.find(p => p.id === produtoId);
+            
+            // Validações específicas por tipo
+            if (quantidade > produto.estoque) {
+                const estoqueMsg = produto.tipo === 'dose' ? 
+                    `${produto.estoque} doses disponíveis` : 
+                    `${produto.estoque} garrafas disponíveis`;
+                mostrarMensagem(mensagemElemento, `Estoque insuficiente! ${estoqueMsg}`, 'erro');
+                return;
+            }
+            
+            // Atualizar estoque
+            produto.estoque -= quantidade;
+            
+            // Calcular valor da venda
+            const valorVenda = quantidade * produto.precoVenda;
+            
+            // Registrar transação
+            const transacao = {
+                id: Date.now(),
+                tipo: 'venda',
+                data: new Date().toISOString().split('T')[0],
+                descricao: `Venda de ${quantidade} ${produto.tipo === 'dose' ? 'doses' : 'garrafas'} de ${produto.nome}`,
+                valor: valorVenda,
+                produtoId: produto.id,
+                quantidade
+            };
+            
+            transacoes.push(transacao);
+            
+            // Salvar dados no localStorage
+            salvarDados();
+            
+            // Feedback e limpeza
+            mostrarMensagem(mensagemElemento, 'Venda registrada com sucesso!', 'sucesso');
+            produtoSelect.value = '';
+            quantidadeInput.value = '';
+            document.getElementById('preco-total').value = '';
+            document.getElementById('pesquisa-produto').value = '';
+            document.getElementById('info-produto').innerHTML = '<p><i class="fas fa-info-circle"></i> Selecione um vinho para ver detalhes</p>';
+            
+            // Atualizar interfaces
+            carregarProdutosVenda();
+            atualizarTabelaEstoque();
+            atualizarResumoFinancas();
+            atualizarGrafico();
+        }
+        
+        function registrarTransacao() {
+            const tipo = document.getElementById('tipo-transacao').value;
+            const data = document.getElementById('data-transacao').value;
+            const descricao = document.getElementById('descricao-transacao').value;
+            const valorInput = document.getElementById('valor-transacao');
+            const valor = parseFloat(valorInput.value);
+            
+            // Validações
+            if (!data) {
+                alert('Informe a data da transação!');
+                return;
+            }
+            
+            if (!descricao) {
+                alert('Informe uma descrição!');
+                return;
+            }
+            
+            if (isNaN(valor) || valor <= 0) {
+                alert('Informe um valor válido!');
+                return;
+            }
+            
+            // Registrar transação
+            const transacao = {
+                id: Date.now(),
+                tipo,
+                data,
+                descricao,
+                valor
+            };
+            
+            transacoes.push(transacao);
+            salvarDados();
+            
+            // Feedback e limpeza
+            alert('Transação registrada com sucesso!');
+            valorInput.value = '';
+            document.getElementById('descricao-transacao').value = '';
+            
+            // Atualizar interfaces
+            atualizarResumoFinancas();
+            atualizarGrafico();
+        }
+        
+        function salvarProduto() {
+            const nome = document.getElementById('nome-produto').value;
+            const precoCompra = parseFloat(document.getElementById('preco-compra').value);
+            const precoVenda = parseFloat(document.getElementById('preco-venda').value);
+            const estoqueMinimo = parseInt(document.getElementById('estoque-minimo').value);
+            const mensagemElemento = document.getElementById('mensagem-produto');
+            
+            // Validações
+            if (!nome) {
+                mostrarMensagem(mensagemElemento, 'Informe o nome do vinho!', 'erro');
+                return;
+            }
+            
+            if (isNaN(precoCompra) || precoCompra <= 0) {
+                mostrarMensagem(mensagemElemento, 'Informe um preço de compra válido!', 'erro');
+                return;
+            }
+            
+            if (isNaN(precoVenda) || precoVenda <= 0) {
+                mostrarMensagem(mensagemElemento, 'Informe um preço de venda válido!', 'erro');
+                return;
+            }
+            
+            if (precoVenda < precoCompra) {
+                mostrarMensagem(mensagemElemento, 'Preço de venda deve ser maior que o de compra!', 'erro');
+                return;
+            }
+            
+            if (isNaN(estoqueMinimo) || estoqueMinimo <= 0) {
+                mostrarMensagem(mensagemElemento, 'Informe um estoque mínimo válido!', 'erro');
+                return;
+            }
+            
+            // Obter estoque baseado no tipo
+            let estoque;
+            if (tipoProdutoAtual === 'dose') {
+                estoque = parseInt(document.getElementById('doses-total').value);
+                if (isNaN(estoque) || estoque <= 0 || !Number.isInteger(estoque)) {
+                    mostrarMensagem(mensagemElemento, 'Informe uma quantidade de doses válida!', 'erro');
+                    return;
+                }
+            } else {
+                estoque = parseInt(document.getElementById('garrafas-total').value);
+                if (isNaN(estoque) || estoque <= 0 || !Number.isInteger(estoque)) {
+                    mostrarMensagem(mensagemElemento, 'Informe uma quantidade de garrafas válida!', 'erro');
+                    return;
+                }
+            }
+            
+            if (produtoEditando) {
+                // Editar produto existente
+                const produto = produtos.find(p => p.id === produtoEditando);
+                produto.nome = nome;
+                produto.estoque = estoque;
+                produto.precoCompra = precoCompra;
+                produto.precoVenda = precoVenda;
+                produto.tipo = tipoProdutoAtual;
+                produto.estoqueMinimo = estoqueMinimo;
+                
+                mostrarMensagem(mensagemElemento, 'Vinho atualizado com sucesso!', 'sucesso');
+                produtoEditando = null;
+            } else {
+                // Adicionar novo produto
+                const novoProduto = {
+                    id: Date.now().toString(),
+                    nome,
+                    estoque,
+                    precoCompra,
+                    precoVenda,
+                    tipo: tipoProdutoAtual,
+                    estoqueMinimo
+                };
+                
+                produtos.push(novoProduto);
+                mostrarMensagem(mensagemElemento, 'Vinho adicionado com sucesso!', 'sucesso');
+            }
+            
+            // Salvar e atualizar
+            salvarDados();
+            limparFormularioProduto();
+            carregarProdutosVenda();
+            atualizarTabelaEstoque();
+        }
+        
+        function editarProduto(id) {
+            const produto = produtos.find(p => p.id === id);
+            if (!produto) return;
+            
+            document.getElementById('nome-produto').value = produto.nome;
+            document.getElementById('preco-compra').value = produto.precoCompra;
+            document.getElementById('preco-venda').value = produto.precoVenda;
+            document.getElementById('estoque-minimo').value = produto.estoqueMinimo;
+            
+            // Configurar tipo do produto
+            tipoProdutoAtual = produto.tipo;
+            document.querySelectorAll('.tipo-btn').forEach(btn => {
+                btn.classList.remove('ativo');
+                if (btn.dataset.tipo === produto.tipo) {
+                    btn.classList.add('ativo');
+                }
+            });
+            
+            if (produto.tipo === 'dose') {
+                document.getElementById('doses-total').value = produto.estoque;
+                document.getElementById('container-doses').style.display = 'block';
+                document.getElementById('container-garrafas').style.display = 'none';
+            } else {
+                document.getElementById('garrafas-total').value = produto.estoque;
+                document.getElementById('container-doses').style.display = 'none';
+                document.getElementById('container-garrafas').style.display = 'block';
+            }
+            
+            produtoEditando = id;
+            document.getElementById('btn-salvar-produto').innerHTML = '<i class="fas fa-save"></i> Atualizar Vinho';
+            
+            // Scroll para o formulário
+            document.getElementById('nome-produto').focus();
+        }
+        
+        function excluirProduto(id) {
+            if (!confirm('Tem certeza que deseja excluir este vinho?')) return;
+            
+            produtos = produtos.filter(p => p.id !== id);
+            salvarDados();
+            
+            // Atualizar interfaces
+            carregarProdutosVenda();
+            atualizarTabelaEstoque();
+        }
+        
+        function limparFormularioProduto() {
+            document.getElementById('nome-produto').value = '';
+            document.getElementById('doses-total').value = '';
+            document.getElementById('garrafas-total').value = '';
+            document.getElementById('preco-compra').value = '';
+            document.getElementById('preco-venda').value = '';
+            document.getElementById('estoque-minimo').value = '5';
+            document.getElementById('mensagem-produto').textContent = '';
+            produtoEditando = null;
+            document.getElementById('btn-salvar-produto').innerHTML = '<i class="fas fa-save"></i> Salvar Vinho';
+            
+            // Resetar para garrafa
+            tipoProdutoAtual = 'garrafa';
+            document.querySelectorAll('.tipo-btn').forEach(btn => {
+                btn.classList.remove('ativo');
+                if (btn.dataset.tipo === 'garrafa') {
+                    btn.classList.add('ativo');
+                }
+            });
+            document.getElementById('container-doses').style.display = 'none';
+            document.getElementById('container-garrafas').style.display = 'block';
+        }
+        
+        function exportarDados() {
+            const dados = {
+                produtos,
+                transacoes,
+                configuracoes,
+                exportadoEm: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(dados, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `vinharia-dados-${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            // Atualizar último backup
+            configuracoes.ultimoBackup = new Date().toISOString();
+            localStorage.setItem('configuracoes', JSON.stringify(configuracoes));
+            document.getElementById('ultimo-backup').textContent = 
+                `Último backup em: ${new Date().toLocaleDateString()} às ${new Date().toLocaleTimeString()}`;
+            
+            alert('Dados exportados com sucesso!');
+        }
+        
+        function iniciarBackupAutomatico() {
+            const intervalo = configuracoes.backupInterval;
+            if (intervalo === 'desativado') return;
+            
+            const agora = new Date();
+            const ultimoBackup = configuracoes.ultimoBackup ? new Date(configuracoes.ultimoBackup) : null;
+            
+            let precisaBackup = false;
+            
+            if (!ultimoBackup) {
+                precisaBackup = true;
+            } else {
+                const diffHoras = (agora - ultimoBackup) / (1000 * 60 * 60);
+                
+                if (intervalo === 'diario' && diffHoras >= 24) {
+                    precisaBackup = true;
+                } else if (intervalo === 'semanal' && diffHoras >= 168) {
+                    precisaBackup = true;
+                } else if (intervalo === 'mensal' && diffHoras >= 720) {
+                    precisaBackup = true;
+                }
+            }
+            
+            if (precisaBackup) {
+                if (confirm('Deseja fazer um backup automático dos dados agora?')) {
+                    exportarDados();
+                }
+            }
+        }
+        
+        function salvarDados() {
+            localStorage.setItem('produtos', JSON.stringify(produtos));
+            localStorage.setItem('transacoes', JSON.stringify(transacoes));
+            localStorage.setItem('configuracoes', JSON.stringify(configuracoes));
+        }
+        
+        function alternarValores() {
+            valoresOcultos = !valoresOcultos;
+            const elementos = document.querySelectorAll('#total-vendas, #total-despesas, #saldo');
+            
+            elementos.forEach(el => {
+                if (valoresOcultos) {
+                    el.classList.remove('valor-visivel');
+                    el.classList.add('valor-oculto');
+                } else {
+                    el.classList.remove('valor-oculto');
+                    el.classList.add('valor-visivel');
+                }
+            });
+            
+            document.getElementById('btn-ocultar-valores').innerHTML = 
+                valoresOcultos ? '<i class="fas fa-eye"></i> Mostrar Valores' : '<i class="fas fa-eye-slash"></i> Ocultar Valores';
+        }
+        
+        function alternarTema() {
+            temaEscuro = !temaEscuro;
+            localStorage.setItem('temaEscuro', temaEscuro);
+            
+            if (temaEscuro) {
+                document.body.setAttribute('data-tema', 'escuro');
+                temaBtn.textContent = '☀️';
+            } else {
+                document.body.removeAttribute('data-tema');
+                temaBtn.textContent = '🌙';
+            }
+        }
+        
+        function calcularPreco() {
+            const produtoId = document.getElementById('produto-venda').value;
+            const quantidade = parseFloat(document.getElementById('quantidade-venda').value);
+            
+            if (!produtoId || isNaN(quantidade) || quantidade <= 0) {
+                document.getElementById('preco-total').value = '';
+                return;
+            }
+            
+            const produto = produtos.find(p => p.id === produtoId);
+            const total = quantidade * produto.precoVenda;
+            document.getElementById('preco-total').value = formatarMoeda(total);
+            
+            // Atualizar informações do produto
+            let infoHTML = `
+                <p><strong>${produto.nome}</strong></p>
+                <p>Tipo: ${produto.tipo === 'dose' ? 'Venda por dose' : 'Venda por garrafa'}</p>
+                <p>Preço por ${produto.tipo === 'dose' ? 'dose' : 'garrafa'}: ${formatarMoeda(produto.precoVenda)}</p>
+                <p>Estoque disponível: ${produto.tipo === 'dose' ? produto.estoque + ' doses' : produto.estoque + ' garrafas'}</p>
+            `;
+            document.getElementById('info-produto').innerHTML = infoHTML;
+            
+            // Atualizar label de quantidade
+            document.getElementById('label-quantidade').textContent = 
+                produto.tipo === 'dose' ? 'Quantidade (doses):' : 'Quantidade (garrafas):';
+        }
+        
+        function configurarEventListeners() {
+            // Navegação
+            navBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    // Remover classe ativa de todos
+                    navBtns.forEach(b => b.classList.remove('ativo'));
+                    
+                    // Adicionar classe ativa ao clicado
+                    this.classList.add('ativo');
+                    
+                    // Mover para a seção correspondente
+                    const secaoId = this.getAttribute('data-secao');
+                    const secaoIndex = Array.from(navBtns).findIndex(b => b === this);
+                    secoes.style.transform = `translateX(-${secaoIndex * 100}%)`;
+                });
+            });
+            
+            // Swipe para dispositivos móveis
+            let touchStartX = 0;
+            
+            secoes.addEventListener('touchstart', e => {
+                touchStartX = e.changedTouches[0].screenX;
+            });
+            
+            secoes.addEventListener('touchend', e => {
+                const touchEndX = e.changedTouches[0].screenX;
+                const diff = touchStartX - touchEndX;
+                const limite = 50; // Sensibilidade do swipe
+                
+                if (Math.abs(diff) < limite) return;
+                
+                const ativoIndex = Array.from(navBtns).findIndex(b => b.classList.contains('ativo'));
+                
+                if (diff > 0 && ativoIndex < navBtns.length - 1) {
+                    // Swipe para esquerda - próxima seção
+                    navBtns[ativoIndex + 1].click();
+                } else if (diff < 0 && ativoIndex > 0) {
+                    // Swipe para direita - seção anterior
+                    navBtns[ativoIndex - 1].click();
+                }
+            });
+            
+            // Botões
+            document.getElementById('btn-vender').addEventListener('click', registrarVenda);
+            document.getElementById('btn-registrar-transacao').addEventListener('click', registrarTransacao);
+            document.getElementById('btn-salvar-produto').addEventListener('click', salvarProduto);
+            document.getElementById('btn-limpar-form').addEventListener('click', limparFormularioProduto);
+            document.getElementById('btn-exportar-dados').addEventListener('click', exportarDados);
+            document.getElementById('btn-exportar-financas').addEventListener('click', gerarRelatorioPDF);
+            document.getElementById('btn-limpar-financas').addEventListener('click', limparFinancas);
+            document.getElementById('btn-ocultar-valores').addEventListener('click', alternarValores);
+            document.getElementById('btn-backup-agora').addEventListener('click', exportarDados);
+            document.getElementById('btn-exportar-completo').addEventListener('click', exportarDados);
+            temaBtn.addEventListener('click', alternarTema);
+            
+            // Campos que disparam cálculos
+            document.getElementById('produto-venda').addEventListener('change', calcularPreco);
+            document.getElementById('quantidade-venda').addEventListener('input', calcularPreco);
+            
+            // Atualizar gráfico quando mês muda
+            document.getElementById('mes-grafico').addEventListener('change', atualizarGrafico);
+            
+            // Toggle tipo de produto
+            document.querySelectorAll('.tipo-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    tipoProdutoAtual = this.dataset.tipo;
+                    document.querySelectorAll('.tipo-btn').forEach(b => b.classList.remove('ativo'));
+                    this.classList.add('ativo');
+                    
+                    if (tipoProdutoAtual === 'dose') {
+                        document.getElementById('container-doses').style.display = 'block';
+                        document.getElementById('container-garrafas').style.display = 'none';
+                    } else {
+                        document.getElementById('container-doses').style.display = 'none';
+                        document.getElementById('container-garrafas').style.display = 'block';
+                    }
+                });
+            });
+            
+            // Configuração de backup
+            document.getElementById('intervalo-backup').addEventListener('change', function() {
+                configuracoes.backupInterval = this.value;
+                localStorage.setItem('configuracoes', JSON.stringify(configuracoes));
+            });
+            
+            // Restaurar backup
+            document.getElementById('btn-restaurar-backup').addEventListener('click', function() {
+                document.getElementById('restore-panel').style.display = 'block';
+            });
+            
+            document.getElementById('arquivo-backup').addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const dados = JSON.parse(event.target.result);
+                        
+                        if (dados.produtos && dados.transacoes) {
+                            document.getElementById('restore-message').innerHTML = 
+                                `<div class="info">Arquivo válido encontrado! Pronto para restaurar.</div>`;
+                            document.getElementById('btn-confirmar-restore').disabled = false;
+                            
+                            // Armazenar dados temporariamente
+                            window.backupData = dados;
+                        } else {
+                            document.getElementById('restore-message').innerHTML = 
+                                `<div class="erro">Arquivo inválido! Certifique-se de que é um backup da Vinharia.</div>`;
+                            document.getElementById('btn-confirmar-restore').disabled = true;
+                        }
+                    } catch (error) {
+                        document.getElementById('restore-message').innerHTML = 
+                            `<div class="erro">Erro ao ler arquivo: ${error.message}</div>`;
+                        document.getElementById('btn-confirmar-restore').disabled = true;
+                    }
+                };
+                
+                reader.readAsText(file);
+            });
+            
+            document.getElementById('btn-confirmar-restore').addEventListener('click', function() {
+                if (!window.backupData) {
+                    alert('Nenhum arquivo válido selecionado!');
+                    return;
+                }
+                
+                if (confirm('ATENÇÃO: Todos os dados atuais serão substituídos. Deseja continuar?')) {
+                    produtos = window.backupData.produtos || [];
+                    transacoes = window.backupData.transacoes || [];
+                    configuracoes = window.backupData.configuracoes || { backupInterval: 'semanal' };
+                    
+                    salvarDados();
+                    
+                    // Recarregar interface
+                    carregarProdutosVenda();
+                    atualizarTabelaEstoque();
+                    atualizarResumoFinancas();
+                    atualizarGrafico();
+                    
+                    // Atualizar backup info
+                    if (configuracoes.ultimoBackup) {
+                        const dataBackup = new Date(configuracoes.ultimoBackup);
+                        document.getElementById('ultimo-backup').textContent = 
+                            `Último backup em: ${dataBackup.toLocaleDateString()} às ${dataBackup.toLocaleTimeString()}`;
+                    }
+                    
+                    document.getElementById('intervalo-backup').value = configuracoes.backupInterval;
+                    
+                    document.getElementById('restore-message').innerHTML = 
+                        `<div class="sucesso">Dados restaurados com sucesso!</div>`;
+                    
+                    setTimeout(() => {
+                        document.getElementById('restore-panel').style.display = 'none';
+                    }, 3000);
+                }
+            });
+        }
+    </script>
+</body>
+</html>
